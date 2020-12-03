@@ -23,15 +23,8 @@ import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
 public class CertificationResourceTest extends JerseyTest {
-  // @Mock
   private static final Engine engine = new Engine();
 
-  private static final Logger LOGGER = LogManager.getLogger();
-  private static final String ASSET_TYPE = "fake";
-  // @InjectMocks
-  CertificationResource certificationResource;
-  // @Mock
-  CertificationResource certificationServiceMock = Mockito.mock(CertificationResource.class);
   private String token;
 
   // @Mock Engine engine;
@@ -70,6 +63,32 @@ public class CertificationResourceTest extends JerseyTest {
             AuthenticationFilter.HEADER_AUTHORIZATION,
             AuthenticationFilter.createAuthorization(token))
         .get();
+  }
+
+  @Test
+  public void
+      givenGetCertifications_whenNoCertificationsAvailable_thenStatusOKButEmptyResponseContent() {
+
+    // ToDo: Combine both get requests in one
+    // Execute first get request
+    Response response =
+        target("/certification")
+            .request()
+            .header(
+                AuthenticationFilter.HEADER_AUTHORIZATION,
+                AuthenticationFilter.createAuthorization(token))
+            .get();
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+    // Execute second get request
+    Map certifications =
+        target("/certification")
+            .request()
+            .header(
+                AuthenticationFilter.HEADER_AUTHORIZATION,
+                AuthenticationFilter.createAuthorization(token))
+            .get(HashMap.class);
+    assertTrue(certifications.isEmpty());
   }
 
   /*
@@ -112,7 +131,6 @@ public class CertificationResourceTest extends JerseyTest {
                       AuthenticationFilter.HEADER_AUTHORIZATION,
                       AuthenticationFilter.createAuthorization(token))
                   .post(Entity.json("{}"));
-          System.out.println("StringTest: " + response);
         });
   }
 
@@ -128,7 +146,6 @@ public class CertificationResourceTest extends JerseyTest {
     Certification mockCertification = new Certification();
     mockCertification.setId("1");
     // Print for debugging purposes
-    System.out.println(mockCertification);
 
     // Create mock of control with id=2 (will be attached to the mocked certification)
     Control mockControl = new Control();
@@ -141,7 +158,6 @@ public class CertificationResourceTest extends JerseyTest {
     oneControlList.add(mockControl);
     mockCertification.setControls(oneControlList);
     // Check if control is inside
-    System.out.println(mockCertification);
 
     // Update the certificate in the certification service
     certService.modifyCertification(mockCertification);
@@ -153,7 +169,6 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.HEADER_AUTHORIZATION,
                 AuthenticationFilter.createAuthorization(this.token))
             .post(Entity.entity("{}", MediaType.APPLICATION_JSON_TYPE));
-    System.out.println("StringTest: " + response);
     assertEquals(
         "HTTP Response should be 204, no content: ",
         Response.Status.NO_CONTENT.getStatusCode(),
@@ -170,8 +185,6 @@ public class CertificationResourceTest extends JerseyTest {
     CertificationService certService = engine.getService(CertificationService.class);
     Certification mockCertification = new Certification();
     mockCertification.setId("1");
-    // Print for debugging purposes
-    System.out.println(mockCertification);
 
     // Create mock of control with id=2 (will be attached to the mocked certification)
     Control mockControl = new Control();
@@ -180,22 +193,10 @@ public class CertificationResourceTest extends JerseyTest {
     mockControl.setDomain(new Domain("TestDomain"));
     mockControl.setActive(true);
 
-    // build a simple rule
-    //    var rule = new Rule();
-    //    rule.addCondition(new CCLDeserializer().parse("MockAsset has property == true"));
-    //    var ruleService = this.engine.getService(RuleService.class);
-    //    ruleService.getRules().put("MockAsset", Set.of(rule));
-    //    mockControl.setRules(List.of(rule));
-    //    certService.startMonitoring(mockControl);
-    //    mockControl.evaluate(this.engine.getServiceLocator());
-    //    certService.modifyCertification(mockCertification);
-
     // Add mocked control (as list of one control) to mocked certification
     List<Control> oneControlList = new ArrayList<>();
     oneControlList.add(mockControl);
     mockCertification.setControls(oneControlList);
-    // Check if control is inside
-    System.out.println(mockCertification);
 
     // Update the certificate in the certification service
     certService.modifyCertification(mockCertification);
@@ -213,7 +214,6 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.HEADER_AUTHORIZATION,
                 AuthenticationFilter.createAuthorization(this.token))
             .post(Entity.entity(controlStatusRequest, MediaType.APPLICATION_JSON_TYPE));
-    System.out.println("StringTest: " + response);
     assertEquals(
         "HTTP Response should be 204: ",
         Response.Status.NO_CONTENT.getStatusCode(),
@@ -232,8 +232,6 @@ public class CertificationResourceTest extends JerseyTest {
     CertificationService certService = engine.getService(CertificationService.class);
     Certification mockCertification = new Certification();
     mockCertification.setId("1");
-    // Print for debugging purposes
-    System.out.println(mockCertification);
 
     // Create mock of control with id=2 (will be attached to the mocked certification)
     Control mockControl = new Control();
@@ -256,8 +254,6 @@ public class CertificationResourceTest extends JerseyTest {
     List<Control> oneControlList = new ArrayList<>();
     oneControlList.add(mockControl);
     mockCertification.setControls(oneControlList);
-    // Check if control is inside
-    System.out.println(mockCertification);
 
     // Update the certificate in the certification service
     certService.modifyCertification(mockCertification);
@@ -278,7 +274,6 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.HEADER_AUTHORIZATION,
                 AuthenticationFilter.createAuthorization(this.token))
             .post(Entity.entity(controlStatusRequest, MediaType.APPLICATION_JSON_TYPE));
-    System.out.println("StringTest: " + response);
     assertEquals(
         "HTTP Response should be 204: ",
         Response.Status.NO_CONTENT.getStatusCode(),
@@ -302,10 +297,6 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.HEADER_AUTHORIZATION,
                 AuthenticationFilter.createAuthorization(token))
             .get();
-    // response.readEntity()
-    // assertEquals("Mock1", response.get);
-    // assertEquals("HTTP Response should be 200: ", Status.OK.getStatusCode(),
-    // response.getStatus());
     assertEquals(
         "Http Content-Type should be: ",
         MediaType.APPLICATION_JSON,
@@ -345,34 +336,6 @@ public class CertificationResourceTest extends JerseyTest {
     assertFalse(certifications.isEmpty());
     assertTrue(certifications.containsKey(mockCertification1.getId()));
     assertTrue(certifications.containsKey(mockCertification2.getId()));
-  }
-
-  @Test
-  public void
-      givenGetCertifications_whenNoCertificationsAvailable_thenStatusOKButEmptyResponseContent() {
-
-    // ToDo: Combine both get requests in one
-    // Execute first get request
-    Response response =
-        target("/certification")
-            .request()
-            .header(
-                AuthenticationFilter.HEADER_AUTHORIZATION,
-                AuthenticationFilter.createAuthorization(token))
-            .get();
-    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    System.out.println(response);
-
-    // Execute second get request
-    Map certifications =
-        target("/certification")
-            .request()
-            .header(
-                AuthenticationFilter.HEADER_AUTHORIZATION,
-                AuthenticationFilter.createAuthorization(token))
-            .get(HashMap.class);
-    System.out.println(certifications);
-    assertTrue(certifications.isEmpty());
   }
 
   @Test
@@ -421,14 +384,13 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.createAuthorization(token))
             .get();
     assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
-    System.out.println(response);
 
     assertThrows(
         NotFoundException.class,
         () -> {
           // Execute second get request
           Certification certification =
-              target("/certification/1")
+              target("/certification/66")
                   .request()
                   .header(
                       AuthenticationFilter.HEADER_AUTHORIZATION,
@@ -478,8 +440,6 @@ public class CertificationResourceTest extends JerseyTest {
     CertificationService certService = engine.getService(CertificationService.class);
     Certification mockCertification = new Certification();
     mockCertification.setId("1");
-    // Print for debugging purposes
-    System.out.println(mockCertification);
 
     // Create mock of control with id=2 (will be attached to the mocked certification)
     Control mockControl = new Control();
@@ -491,8 +451,6 @@ public class CertificationResourceTest extends JerseyTest {
     List<Control> oneControlList = new ArrayList<>();
     oneControlList.add(mockControl);
     mockCertification.setControls(oneControlList);
-    // Check if control is inside
-    System.out.println(mockCertification);
 
     // Update the certificate in the certification service
     certService.modifyCertification(mockCertification);
@@ -504,11 +462,9 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.HEADER_AUTHORIZATION,
                 AuthenticationFilter.createAuthorization(this.token))
             .get();
-    System.out.println(response);
     // Assertions.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     // ToDo: Check the returned object
     Control controlOfResponse = response.readEntity(Control.class);
-    System.out.println(controlOfResponse);
   }
 
   /*
@@ -576,7 +532,6 @@ public class CertificationResourceTest extends JerseyTest {
                 AuthenticationFilter.HEADER_AUTHORIZATION,
                 AuthenticationFilter.createAuthorization(this.token))
             .get();
-    System.out.println(response);
   }
 
   @BeforeEach
