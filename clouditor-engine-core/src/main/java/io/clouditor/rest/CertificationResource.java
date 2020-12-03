@@ -132,6 +132,7 @@ public class CertificationResource {
   }
 
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("{certificationId}/{controlId}")
   public Control getControl(
       @PathParam("certificationId") String certificationId,
